@@ -24,7 +24,7 @@ const config = {
       },
       colors: {
         main: "#2741a8",
-        bland: "#f5f5f5",
+        bland: "#f5f5f3",
         white: "#ffffff",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
