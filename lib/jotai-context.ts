@@ -2,9 +2,9 @@ import { atom } from "jotai";
 import useLocalStorage from "./hooks/use-local-storage";
 
 export const userAtom = atom<UserType>({
-  name: "",
-  currency: "",
-  symbol: "",
+  name: "Asa",
+  currency: "USD",
+  symbol: "$",
 });
 
 export const storeAtom = atom<Expenses[]>([]);

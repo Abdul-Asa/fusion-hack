@@ -16,6 +16,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "csv": "^6.3.8",
+    "framer-motion": "^11.0.14",
     "jotai": "^2.7.1",
     "jotai-devtools": "^0.8.0",
     "lucide-react": "^0.358.0",

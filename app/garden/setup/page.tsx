@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useSync } from "@/lib/hooks/use-sync";
 import { Card } from "@/components/ui/card";
+import { MobileMenu } from "@/components/mobile-menu";
 
 const Setup: React.FC = () => {
   const [userPref, setUserPref] = useAtom(userAtom);
@@ -46,7 +47,10 @@ const Setup: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full lg:p-10 p-6">
-      <h1 className="text-3xl  mb-10 text-main">Setup</h1>
+      <div className="flex justify-between mb-2 lg:mb-10 items-center">
+        <h1 className="lg:text-3xl text-lg text-main">Setup</h1>
+        <MobileMenu />
+      </div>
       <Card>
         <form onSubmit={handleSubmit} className="lg:m-10   space-y-8">
           <label className="flex flex-col ">

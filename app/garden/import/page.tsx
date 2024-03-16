@@ -3,11 +3,13 @@ import React, { useCallback } from "react";
 import { toast } from "sonner";
 import { Expenses, storeAtom } from "@/lib/jotai-context";
 import { Card } from "@/components/ui/card";
-import { ImportIcon } from "lucide-react";
+import { ImportIcon, MenuIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { parse } from "csv-parse";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { MobileMenu } from "@/components/mobile-menu";
 
 const Import: React.FC = () => {
   const [expenseList, setExpensesList] = useAtom(storeAtom);
@@ -102,11 +104,14 @@ const Import: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full lg:p-10 p-6 ">
-      <h1 className="text-3xl  mb-10 text-main">Import CSV</h1>
+      <div className="flex justify-between mb-2 lg:mb-10 items-center">
+        <h1 className="lg:text-3xl text-lg text-main">Import CSV</h1>
+        <MobileMenu />
+      </div>
       <div className="flex gap-6 h-full flex-col">
         <Card {...getRootProps()} className=" flex-grow">
           <input {...getInputProps()} />
-          <div className="justify-center flex flex-col gap-4 items-center ">
+          <div className="justify-center flex flex-col gap-4 items-center h-full ">
             <ImportIcon className="opacity-50 text-main" size={100} />
             <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer">
               Import your CSV file
