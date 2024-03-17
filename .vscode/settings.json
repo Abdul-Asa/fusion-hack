@@ -14,7 +14,7 @@
     "**/components.json": true,
     "**/next-env.d.ts": true,
     "**/package-lock.json": true,
-    "**/README.md": true,
+    "**/README.md": false,
     "**/.vscode": true
   },
   "explorerExclude.backup": {}
