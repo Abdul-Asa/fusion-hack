@@ -25,20 +25,21 @@ const MainGarden: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full lg:p-10 p-6">
-      <div className="flex justify-between mb-2 lg:mb-10 items-center">
-        <h1 className="lg:text-3xl text-lg text-main">Garden</h1>
+    <div className="flex flex-col h-full p-6 lg:p-10">
+      <div className="flex items-center justify-between mb-2 lg:mb-10">
+        <h1 className="text-lg lg:text-3xl text-main">Garden</h1>
         <MobileMenu />
       </div>
       <Card className="flex-grow gap-4">
         <h1>Hi, {userPref.name}</h1>
         <div
           ref={containerRef}
-          className="border-2 border-main relative justify-center items-center h-full flex overflow-hidden"
+          className="relative flex items-center justify-center h-full overflow-hidden border-2 border-main"
         >
-          <Canvas width={containerSize.width} height={containerSize.height}>
-            Hello
-          </Canvas>
+          <Canvas
+            width={containerSize.width}
+            height={containerSize.height}
+          ></Canvas>
         </div>
       </Card>
     </div>
@@ -83,14 +84,14 @@ export default MainGarden;
 
 //   return (
 //     <div className="p-5">
-//       <form onSubmit={handleSubmit} className="mb-5 flex flex-col space-y-4">
+//       <form onSubmit={handleSubmit} className="flex flex-col mb-5 space-y-4">
 //         <input
 //           type="text"
 //           name="description"
 //           value={newExpense.description}
 //           onChange={handleChange}
 //           placeholder="Description"
-//           className="border-2 border-gray-300 rounded-md p-2"
+//           className="p-2 border-2 border-gray-300 rounded-md"
 //         />
 //         <input
 //           type="number"
@@ -98,14 +99,14 @@ export default MainGarden;
 //           value={newExpense.amount}
 //           onChange={handleChange}
 //           placeholder="Amount"
-//           className="border-2 border-gray-300 rounded-md p-2"
+//           className="p-2 border-2 border-gray-300 rounded-md"
 //         />
 //         <input
 //           type="date"
 //           name="date"
 //           value={newExpense.date}
 //           onChange={handleChange}
-//           className="border-2 border-gray-300 rounded-md p-2"
+//           className="p-2 border-2 border-gray-300 rounded-md"
 //         />
 //         <input
 //           type="text"
@@ -113,9 +114,9 @@ export default MainGarden;
 //           value={newExpense.category}
 //           onChange={handleChange}
 //           placeholder="Category"
-//           className="border-2 border-gray-300 rounded-md p-2"
+//           className="p-2 border-2 border-gray-300 rounded-md"
 //         />
-//         <button type="submit" className="p-2 bg-blue-500 text-white rounded-md">
+//         <button type="submit" className="p-2 text-white bg-blue-500 rounded-md">
 //           Add Expense
 //         </button>
 //       </form>
@@ -123,7 +124,7 @@ export default MainGarden;
 //         {expenses.map((expense) => (
 //           <li
 //             key={expense.id}
-//             className="border-2 border-gray-300 rounded-md p-2"
+//             className="p-2 border-2 border-gray-300 rounded-md"
 //           >
 //             {expense.description} - {expense.amount} - {expense.date} -{" "}
 //             {expense.category}

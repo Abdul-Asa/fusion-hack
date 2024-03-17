@@ -3,6 +3,7 @@ import { Fraunces, Chivo } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 import { Provider } from "@/components/provider";
+import Script from "next/script";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -28,7 +29,6 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${fraunces.variable} ${chivo.variable}`}>
         <Provider>
-          {" "}
           {children}
           <Toaster position="top-right" richColors />
         </Provider>

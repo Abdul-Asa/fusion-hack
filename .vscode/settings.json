@@ -1,0 +1,21 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.gitignore": false,
+    "**/postcss.config.js": true,
+    "**/.next": false,
+    "**/node_modules": true,
+    "**/.eslintrc.json": true,
+    "**/components.json": true,
+    "**/next-env.d.ts": true,
+    "**/package-lock.json": true,
+    "**/README.md": true,
+    "**/.vscode": true
+  },
+  "explorerExclude.backup": {}
+}
