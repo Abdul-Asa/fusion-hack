@@ -93,15 +93,15 @@ const Import: React.FC = () => {
   console.log(data1);
 
   return (
-    <div className="flex flex-col h-screen lg:p-10 p-6 ">
+    <div className="flex flex-col h-screen lg:p-10 p-6 w-full ">
       <div className="flex justify-between mb-2 lg:mb-10 items-center">
         <h1 className="lg:text-3xl text-lg text-main">Finance</h1>
         <MobileMenu />
       </div>
 
-      <Card className="flex h-full flex-col gap-2 overflow-scroll">
+      <Card className="flex h-full w-full flex-col gap-2 overflow-scroll">
         <div className="flex lg:flex-row flex-col gap-8 p-2 ">
-          <div className="rounded-lg w-full flex border border-main">
+          <div className="rounded-lg w-full flex border border-main ">
             <PieChart width={400} height={400}>
               <Pie
                 dataKey="value"
@@ -110,7 +110,7 @@ const Import: React.FC = () => {
                 cx={200}
                 cy={200}
                 outerRadius={80}
-                fill="#8884d8"
+                fill="#2741a8"
                 label={(entry) => `${userPref.symbol}${entry.value.toFixed(2)}`}
               />
               <Tooltip formatter={(value) => `${userPref.symbol}${value}`} />
@@ -137,7 +137,7 @@ const Import: React.FC = () => {
               />
               <Tooltip formatter={(value) => `${userPref.symbol}${value}`} />
               <Legend />
-              <Bar dataKey="value" fill="#8884d8" />
+              <Bar dataKey="value" fill="#2741a8" />
             </BarChart>
           </div>
         </div>
@@ -189,6 +189,9 @@ const Import: React.FC = () => {
           </Table>
         </div>
       </Card>
+      <p className="lg:block hidden text-xs text-center pt-10 text-main">
+        A penny saved is a penny earned.
+      </p>
     </div>
   );
 };

@@ -153,11 +153,14 @@ const Import: React.FC = () => {
           >
             <PackageIcon className="opacity-50 text-main" size={100} />
             <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer">
-              Export your CSV file
+              Export your data as a CSV file
             </p>
           </div>
         </Card>
       </div>
+      <p className="lg:block hidden text-xs text-center pt-10 text-main">
+        Made with 💜 by Shehu
+      </p>
     </div>
   );
 };

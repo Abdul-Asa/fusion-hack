@@ -89,6 +89,9 @@ const Setup: React.FC = () => {
           </Button>
         </form>
       </Card>
+      <p className="lg:block hidden text-xs text-center pt-10 text-main">
+        A certified Shehu Product
+      </p>
     </div>
   );
 };

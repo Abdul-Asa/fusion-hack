@@ -74,12 +74,14 @@ export default function Canvas({
     lastY: 0,
   });
   const [panMode, setPanMode] = useState(false);
-  const [mergeMode, setMergeMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [select, setSelect] = useState("");
   const [amount, setAmount] = useState(0);
   const [description, setDescription] = useState("");
-  const [chosenId, setChosenId] = useState(["", ""]);
+  const [chosenId, setChosenId] = useState("");
+  const [chosenId2, setChosenId2] = useState("");
+
+  const [keyIsDown, setKeyIsDown] = useState(false);
   const listCat = [
     "Food",
     "Transport",
@@ -89,6 +91,18 @@ export default function Canvas({
     "Fashion",
     "Misc",
   ];
+  useEffect(() => {
+    const handleKeyDown = () => setKeyIsDown(true);
+    const handleKeyUp = () => setKeyIsDown(false);
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
   const imgSrcs = [
     "/tang-big.png",
     "/white-big.png",
@@ -125,7 +139,8 @@ export default function Canvas({
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     console.log("onPointerDown");
-    setChosenId(["", ""]);
+    setChosenId("");
+    setChosenId2("");
     // setSelectedLayer(null);
     if (!panMode) return;
     setIsDragging(true);
@@ -183,10 +198,10 @@ export default function Canvas({
     ]);
   };
   const handleMerge = () => {
-    if (chosenId[0] === "" || chosenId[1] === "") return;
+    if (chosenId === "" || chosenId2 === "") return;
 
-    const item1 = store.find((item) => item.id === chosenId[0]);
-    const item2 = store.find((item) => item.id === chosenId[1]);
+    const item1 = store.find((item) => item.id === chosenId);
+    const item2 = store.find((item) => item.id === chosenId2);
 
     if (!item1 || !item2) return;
     if (
@@ -213,7 +228,7 @@ export default function Canvas({
       });
     } else {
       const newId = crypto.randomUUID();
-      const newSize = item1.size + 50;
+      const newSize = item1.size + 100;
 
       setStore((prev) => [
         ...prev.filter((item) => item.id !== item1.id && item.id !== item2.id),
@@ -228,7 +243,8 @@ export default function Canvas({
       ]);
     }
 
-    setChosenId(["", ""]);
+    setChosenId("");
+    setChosenId2("");
   };
 
   return (
@@ -259,16 +275,20 @@ export default function Canvas({
           return (
             <motion.div
               className={`flex flex-col items-center justify-between ${
-                chosenId.includes(expense.id) ? "border border-main " : ""
+                chosenId === expense.id || chosenId2 === expense.id
+                  ? "border-2 border-main "
+                  : ""
               }`}
               drag
               onClick={(e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                setChosenId((prev) => {
-                  if (prev[0] === "") return [expense.id, ""];
-                  else return [prev[0], expense.id];
-                });
+                if (keyIsDown) {
+                  if (chosenId === "") {
+                    setChosenId(expense.id);
+                  } else if (chosenId2 === "") {
+                    setChosenId2(expense.id);
+                  }
+                }
               }}
               dragMomentum={false}
               dragConstraints={containerRef}

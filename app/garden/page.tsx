@@ -42,6 +42,9 @@ const MainGarden: React.FC = () => {
           ></Canvas>
         </div>
       </Card>
+      <p className="lg:block hidden text-xs text-center pt-10 text-main">
+        A dollar might turn to a million and we all rich
+      </p>
     </div>
   );
 };
