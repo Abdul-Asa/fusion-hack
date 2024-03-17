@@ -20,7 +20,7 @@ const Setup: React.FC = () => {
     event.preventDefault();
     setUserPref({ name, currency, symbol });
     // saveToLocalStorage();
-    router.push("/garden/import");
+    router.push("/garden/");
   };
   const currencies = [
     {

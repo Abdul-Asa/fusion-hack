@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
-import { CalendarIcon, HandIcon, PlusIcon } from "lucide-react";
+import { CalendarIcon, HandIcon, HandshakeIcon, PlusIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAtom } from "jotai";
 import { storeAtom } from "@/lib/jotai-context";
@@ -16,6 +16,7 @@ import {
 } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -28,7 +29,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
-import { format } from "date-fns";
+import { format, set } from "date-fns";
 
 export default function Canvas({
   height,
@@ -41,6 +42,25 @@ export default function Canvas({
 }) {
   const [expenses, setExpenses] = useAtom(storeAtom);
   const [date, setDate] = useState<Date>();
+  const [store, setStore] = useState<
+    {
+      id: string;
+      category: string;
+      x: number;
+      y: number;
+      size: number;
+      merged: string[];
+    }[]
+  >(
+    expenses.map((act) => ({
+      x: Math.random() * 1000,
+      y: Math.random() * 1000,
+      id: act.id,
+      category: act.category,
+      size: 200,
+      merged: [],
+    }))
+  );
 
   const [camera, setCamera] = useState<{
     x: number;
@@ -54,14 +74,12 @@ export default function Canvas({
     lastY: 0,
   });
   const [panMode, setPanMode] = useState(false);
+  const [mergeMode, setMergeMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [notePositions] = useState(
-    expenses.map(() => ({ x: Math.random() * 2000, y: Math.random() * 2000 }))
-  );
   const [select, setSelect] = useState("");
   const [amount, setAmount] = useState(0);
   const [description, setDescription] = useState("");
-
+  const [chosenId, setChosenId] = useState(["", ""]);
   const listCat = [
     "Food",
     "Transport",
@@ -69,12 +87,25 @@ export default function Canvas({
     "Entertainment",
     "Shopping",
     "Fashion",
+    "Misc",
   ];
+  const imgSrcs = [
+    "/tang-big.png",
+    "/white-big.png",
+    "/palm-big.png",
+    "/spooky-big.png",
+    "/last.png",
+    "/bush.png",
+    "/aut-big.png",
+  ];
+  const categoryImagePairs = listCat.map((category, index) => ({
+    category,
+    imgSrc: imgSrcs[index],
+  }));
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (event: React.WheelEvent) => {
-    event.preventDefault();
     console.log("scrolling");
     setCamera((prev) => {
       let newX = prev.x - event.deltaX;
@@ -94,6 +125,7 @@ export default function Canvas({
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     console.log("onPointerDown");
+    setChosenId(["", ""]);
     // setSelectedLayer(null);
     if (!panMode) return;
     setIsDragging(true);
@@ -138,7 +170,65 @@ export default function Canvas({
         description: description,
       },
     ]);
-    notePositions.push({ x: Math.random() * 2000, y: Math.random() * 2000 });
+    setStore([
+      ...store,
+      {
+        id: crypto.randomUUID(),
+        category: select,
+        x: Math.random() * 1000,
+        y: Math.random() * 1000,
+        size: 200,
+        merged: [],
+      },
+    ]);
+  };
+  const handleMerge = () => {
+    if (chosenId[0] === "" || chosenId[1] === "") return;
+
+    const item1 = store.find((item) => item.id === chosenId[0]);
+    const item2 = store.find((item) => item.id === chosenId[1]);
+
+    if (!item1 || !item2) return;
+    if (
+      item1.category !== item2.category ||
+      item1.merged.length !== item2.merged.length
+    )
+      return;
+
+    if (item1.merged.length > 1 && item2.merged.length > 1) {
+      const merged = [...item1.merged, ...item2.merged];
+      const mergedItem = {
+        id: crypto.randomUUID(),
+        category: item1.category,
+        x: (item1.x + item2.x) / 2,
+        y: (item1.y + item2.y) / 2,
+        size: item1.size + item2.size,
+        merged,
+      };
+      setStore((prev) => {
+        const newStore = prev.filter(
+          (item) => item.id !== item1.id && item.id !== item2.id
+        );
+        return [...newStore, mergedItem];
+      });
+    } else {
+      const newId = crypto.randomUUID();
+      const newSize = item1.size + 50;
+
+      setStore((prev) => [
+        ...prev.filter((item) => item.id !== item1.id && item.id !== item2.id),
+        {
+          id: newId,
+          category: item1.category,
+          x: Math.random() * 1000,
+          y: Math.random() * 1000,
+          size: newSize,
+          merged: [item1.id, item2.id],
+        },
+      ]);
+    }
+
+    setChosenId(["", ""]);
   };
 
   return (
@@ -152,31 +242,53 @@ export default function Canvas({
         style={{
           translate: `${camera.x}px ${camera.y}px`,
           position: "absolute",
-          backgroundColor: "#dadad2",
-          backgroundImage:
-            "radial-gradient(circle, #000000 1px, transparent 1px)",
-          backgroundSize: "30px 30px",
-          border: "8px solid red",
+          backgroundImage: "url('/grass.png')",
+          backgroundSize: "repeat",
+          border: "8px solid brown",
           height: "2000px",
           width: "2000px",
         }}
       >
-        {expenses.map((expense, index) => {
+        {store.map((expense, index) => {
+          const expenseImageSrc =
+            categoryImagePairs.find(
+              (pair) =>
+                pair.category.toLowerCase() === expense.category.toLowerCase()
+            )?.imgSrc || "";
+
           return (
             <motion.div
+              className={`flex flex-col items-center justify-between ${
+                chosenId.includes(expense.id) ? "border border-main " : ""
+              }`}
               drag
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setChosenId((prev) => {
+                  if (prev[0] === "") return [expense.id, ""];
+                  else return [prev[0], expense.id];
+                });
+              }}
               dragMomentum={false}
               dragConstraints={containerRef}
               style={{
-                backgroundColor: "blue",
-                width: "100px",
-                height: "100px",
-                x: notePositions[index].x,
-                y: notePositions[index].y,
+                width: expense.size,
+                height: expense.size,
+                x: expense.x,
+                y: expense.y,
+                color: "white",
+                textAlign: "center",
               }}
               key={index}
             >
-              {expense.category}
+              <Image
+                alt={"tree:" + expense.category}
+                src={expenseImageSrc}
+                draggable={false}
+                fill
+              />
+              {/* {expense.category} */}
             </motion.div>
           );
         })}
@@ -188,6 +300,13 @@ export default function Canvas({
           onClick={() => setPanMode(!panMode)}
         >
           <HandIcon />
+        </Button>
+        <Button
+          disabled={chosenId[0] === "" || chosenId[1] === ""}
+          size={"icon"}
+          onClick={handleMerge}
+        >
+          <HandshakeIcon />
         </Button>
       </div>
       <div className="absolute top-2 right-2">

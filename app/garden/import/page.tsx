@@ -3,9 +3,10 @@ import React, { useCallback } from "react";
 import { toast } from "sonner";
 import { Expenses, storeAtom } from "@/lib/jotai-context";
 import { Card } from "@/components/ui/card";
-import { ImportIcon, MenuIcon } from "lucide-react";
+import { ImportIcon, PackageIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { parse } from "csv-parse";
+import { stringify } from "csv-stringify";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -102,6 +103,25 @@ const Import: React.FC = () => {
     maxFiles: 1,
   });
 
+  const handleExport = () => {
+    stringify(expenseList, { header: true }, (err, output) => {
+      if (err) {
+        console.error(err);
+        toast.error("Error generating CSV");
+        return;
+      }
+
+      const blob = new Blob([output], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+
+      const url = URL.createObjectURL(blob);
+      link.href = url;
+      link.setAttribute("download", "export.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+  };
   return (
     <div className="flex flex-col h-full lg:p-10 p-6 ">
       <div className="flex justify-between mb-2 lg:mb-10 items-center">
@@ -126,11 +146,16 @@ const Import: React.FC = () => {
             </p>
           </div>
         </Card>
-        <Card className="flex-grow">
-          <p className="text-main">
-            <span className="font-bold">Note:</span> Only CSV files are
-            supported
-          </p>
+        <Card className=" flex-grow">
+          <div
+            className="justify-center flex flex-col gap-4 items-center h-full "
+            onClick={handleExport}
+          >
+            <PackageIcon className="opacity-50 text-main" size={100} />
+            <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer">
+              Export your CSV file
+            </p>
+          </div>
         </Card>
       </div>
     </div>
