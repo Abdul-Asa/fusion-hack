@@ -10,10 +10,13 @@ import {
   LogOutIcon,
   HomeIcon,
   ReceiptIcon,
+  DeleteIcon,
+  Trash,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function Sidebar() {
   const [trigger, setTrigger] = useState(false);
@@ -62,6 +65,17 @@ export default function Sidebar() {
             <HomeIcon size={20} className="mr-2" />
             Home
           </Link>
+          <button
+            className="hover:underline flex items-center text-red-500"
+            onClick={() => {
+              localStorage.removeItem("user");
+              localStorage.removeItem("expenses");
+              toast.info("Data deleted");
+            }}
+          >
+            <Trash size={20} className="mr-2" />
+            Delete Data
+          </button>
         </ul>
       </div>
     </nav>
