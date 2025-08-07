@@ -1,7 +1,12 @@
 "use client";
 import React, { useCallback } from "react";
 import { toast } from "sonner";
-import { Expenses, storeAtom } from "@/lib/jotai-context";
+import {
+  Expenses,
+  storeAtom,
+  gardenAtom,
+  type GardenNode,
+} from "@/lib/jotai-context";
 import { Card } from "@/components/ui/card";
 import { ImportIcon, PackageIcon } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -13,6 +18,7 @@ import { MobileMenu } from "@/components/mobile-menu";
 
 const Import: React.FC = () => {
   const [expenseList, setExpensesList] = useAtom(storeAtom);
+  const [, setGardenNodes] = useAtom(gardenAtom);
   const router = useRouter();
 
   const onDrop = useCallback(
@@ -86,7 +92,20 @@ const Import: React.FC = () => {
                   category: row.category,
                 }));
 
+                // Create garden nodes for each expense (unmerged)
+                const newGardenNodes: GardenNode[] = expenses.map(
+                  (expense) => ({
+                    id: crypto.randomUUID(),
+                    category: expense.category,
+                    x: Math.random() * 1000,
+                    y: Math.random() * 1000,
+                    size: 200,
+                    expenseIds: [expense.id],
+                  })
+                );
+
                 setExpensesList((prev) => [...prev, ...expenses]);
+                setGardenNodes((prev) => [...prev, ...newGardenNodes]);
                 toast.success("CSV file imported successfully", {
                   action: {
                     label: "Go to garden",
@@ -104,7 +123,7 @@ const Import: React.FC = () => {
         reader.readAsText(file);
       });
     },
-    [router, setExpensesList]
+    [router, setExpensesList, setGardenNodes]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -131,6 +150,7 @@ const Import: React.FC = () => {
       document.body.removeChild(link);
     });
   };
+
   return (
     <div className="flex flex-col h-full lg:p-10 p-6 ">
       <div className="flex justify-between mb-2 lg:mb-10 items-center">

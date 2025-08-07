@@ -1,17 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import {
   CalendarIcon,
-  HandIcon,
-  HandshakeIcon,
   PlusIcon,
   DollarSignIcon,
   FileTextIcon,
   TagIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import { useAtom } from "jotai";
-import { storeAtom, gardenAtom, type GardenNode } from "@/lib/jotai-context";
+import { useAtom, useAtomValue } from "jotai";
+import {
+  storeAtom,
+  gardenAtom,
+  type GardenNode,
+  userAtom,
+} from "@/lib/jotai-context";
 import {
   Dialog,
   DialogClose,
@@ -47,22 +49,16 @@ export default function Canvas({
   height: number;
   width: number;
 }) {
+  const userPref = useAtomValue(userAtom);
   const [expenses, setExpenses] = useAtom(storeAtom);
   const [gardenNodes, setGardenNodes] = useAtom(gardenAtom);
   const [camera, setCamera] = useState<{
     x: number;
     y: number;
-    lastX?: number;
-    lastY?: number;
   }>({
     x: 0,
     y: 0,
-    lastX: 0,
-    lastY: 0,
   });
-  const [panMode, setPanMode] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<{
     description: string;
     amount: number;
@@ -74,8 +70,6 @@ export default function Canvas({
     category: "",
     date: undefined,
   });
-
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (event: React.WheelEvent) => {
     setCamera((prev) => {
@@ -92,40 +86,6 @@ export default function Canvas({
 
       return { x: newX, y: newY };
     });
-  };
-
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!panMode) return;
-    setIsDragging(true);
-    setCamera((prev) => ({
-      ...prev,
-      lastX: event.clientX,
-      lastY: event.clientY,
-    }));
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!panMode) return;
-    if (!isDragging) return;
-    setCamera((prev) => {
-      if (!prev.lastX || !prev.lastY) return prev;
-      let newX = prev.x + event.clientX - prev.lastX;
-      let newY = prev.y + event.clientY - prev.lastY;
-
-      const maxX = 2000 / 2 - width / 2;
-      const maxY = 2000 / 2 - height / 2;
-      const minX = -(2000 / 2) + width / 2;
-      const minY = -(2000 / 2) + height / 2;
-
-      newX = Math.min(Math.max(newX, minX), maxX);
-      newY = Math.min(Math.max(newY, minY), maxY);
-
-      return { x: newX, y: newY, lastX: event.clientX, lastY: event.clientY };
-    });
-  };
-
-  const onPointerUp = () => {
-    setIsDragging(false);
   };
 
   const handleSubmit = () => {
@@ -161,59 +121,23 @@ export default function Canvas({
     });
   };
 
-  const handleMerge = () => {
-    return;
-    // if (chosenId === "" || chosenId2 === "") return;
-
-    // const item1 = gardenNodes.find((item) => item.id === chosenId);
-    // const item2 = gardenNodes.find((item) => item.id === chosenId2);
-
-    // if (!item1 || !item2) return;
-    // if (item1.category !== item2.category) return;
-
-    // const mergedItem: GardenNode = {
-    //   id: crypto.randomUUID(),
-    //   category: item1.category,
-    //   x: (item1.x + item2.x) / 2,
-    //   y: (item1.y + item2.y) / 2,
-    //   size: item1.size + item2.size,
-    //   expenseIds: Array.from(
-    //     new Set([...(item1.expenseIds || []), ...(item2.expenseIds || [])])
-    //   ),
-    // };
-    // setGardenNodes((prev) => {
-    //   const filtered = prev.filter(
-    //     (n) => n.id !== item1.id && n.id !== item2.id
-    //   );
-    //   return [...filtered, mergedItem];
-    // });
-
-    // setChosenId("");
-    // setChosenId2("");
-  };
-
-  const handleNodeDrag = (id: string, deltaX: number, deltaY: number) => {
-    setGardenNodes((prev) =>
-      prev.map((n) =>
-        n.id === id
-          ? {
-              ...n,
-              x: n.x + deltaX,
-              y: n.y + deltaY,
-            }
-          : n
-      )
+  const getTreeLabel = (node: GardenNode) => {
+    const treeExpenses = expenses.filter((expense) =>
+      node.expenseIds.includes(expense.id)
     );
+    const total = treeExpenses.reduce(
+      (acc, expense) => acc + expense.amount,
+      0
+    );
+    return `${userPref.symbol}${total} - ${treeExpenses
+      .map((expense) => expense.description)
+      .join(", ")}`;
   };
 
   return (
     <>
-      <motion.div
+      <div
         onWheel={handleScroll}
-        ref={containerRef}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
         style={{
           translate: `${camera.x}px ${camera.y}px`,
           position: "absolute",
@@ -232,27 +156,15 @@ export default function Canvas({
             )?.imgSrc || "";
 
           return (
-            <motion.div
+            <div
               key={node.id}
-              className={`relative flex flex-col items-center justify-end ${
-                selectedId === node.id ? "border-2 border-main" : ""
-              }`}
-              drag
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedId(node.id);
-              }}
-              onDrag={(e, info) =>
-                handleNodeDrag(node.id, info.delta.x, info.delta.y)
-              }
-              dragMomentum={false}
-              dragConstraints={containerRef}
+              className="relative flex flex-col items-center justify-end"
               style={{
+                position: "absolute",
                 width: node.size,
                 height: node.size,
-                x: node.x,
-                y: node.y,
+                left: node.x,
+                top: node.y,
                 color: "white",
                 textAlign: "center",
               }}
@@ -264,24 +176,13 @@ export default function Canvas({
                 fill
               />
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 mb-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
-                {JSON.stringify(node)}
+                {getTreeLabel(node)}
               </div>
-            </motion.div>
+            </div>
           );
         })}
-      </motion.div>
-      <div className="absolute flex gap-2 top-2 left-2">
-        <Button
-          variant={panMode ? "default" : "outline"}
-          size={"icon"}
-          onClick={() => setPanMode(!panMode)}
-        >
-          <HandIcon />
-        </Button>
-        <Button size={"icon"} onClick={handleMerge}>
-          <HandshakeIcon />
-        </Button>
       </div>
+
       <div className="absolute top-2 right-2">
         <Dialog>
           <DialogTrigger asChild>

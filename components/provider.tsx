@@ -4,7 +4,9 @@ import { useAtomsDebugValue } from "jotai-devtools";
 
 export const Provider = ({ children }: { children: React.ReactNode }) => {
   const DebugAtoms = () => {
-    useAtomsDebugValue();
+    if (process.env.NODE_ENV === "development") {
+      useAtomsDebugValue();
+    }
     return null;
   };
   return (

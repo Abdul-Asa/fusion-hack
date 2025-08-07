@@ -6,7 +6,7 @@ import { Card } from "./ui/card";
  */
 export function CanvasLoader() {
   return (
-    <div className="relative flex items-center justify-center h-full overflow-hidden border-2 border-main">
+    <div className="relative flex items-center justify-center h-full overflow-hidden ">
       <div className="flex flex-col items-center justify-center space-y-4">
         {/* Animated plant/garden icon */}
         <div className="relative">
