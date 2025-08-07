@@ -59,6 +59,17 @@ export default function Canvas({
     x: 0,
     y: 0,
   });
+  const [isPanning, setIsPanning] = useState(false);
+  const [lastPanPoint, setLastPanPoint] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [isDraggingTree, setIsDraggingTree] = useState(false);
+  const [draggedTreeId, setDraggedTreeId] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
   const [form, setForm] = useState<{
     description: string;
     amount: number;
@@ -71,21 +82,169 @@ export default function Canvas({
     date: undefined,
   });
 
+  const constrainCamera = (x: number, y: number) => {
+    const maxX = 2000 / 2 - width / 2;
+    const maxY = 2000 / 2 - height / 2;
+    const minX = -(2000 / 2) + width / 2;
+    const minY = -(2000 / 2) + height / 2;
+
+    const newX = Math.min(Math.max(x, minX), maxX);
+    const newY = Math.min(Math.max(y, minY), maxY);
+
+    return { x: newX, y: newY };
+  };
+
   const handleScroll = (event: React.WheelEvent) => {
     setCamera((prev) => {
-      let newX = prev.x - event.deltaX;
-      let newY = prev.y - event.deltaY;
-
-      const maxX = 2000 / 2 - width / 2;
-      const maxY = 2000 / 2 - height / 2;
-      const minX = -(2000 / 2) + width / 2;
-      const minY = -(2000 / 2) + height / 2;
-
-      newX = Math.min(Math.max(newX, minX), maxX);
-      newY = Math.min(Math.max(newY, minY), maxY);
-
-      return { x: newX, y: newY };
+      const newX = prev.x - event.deltaX;
+      const newY = prev.y - event.deltaY;
+      return constrainCamera(newX, newY);
     });
+  };
+
+  // Mouse pan handlers
+  const handleMouseDown = (event: React.MouseEvent) => {
+    if (!isDraggingTree) {
+      setIsPanning(true);
+      setLastPanPoint({ x: event.clientX, y: event.clientY });
+    }
+  };
+
+  const handleMouseMove = (event: React.MouseEvent) => {
+    if (isDraggingTree && draggedTreeId) {
+      // Handle tree dragging
+      const newX = event.clientX - dragOffset.x - camera.x;
+      const newY = event.clientY - dragOffset.y - camera.y;
+
+      setGardenNodes((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === draggedTreeId
+            ? {
+                ...node,
+                x: Math.max(0, Math.min(newX, 1800)),
+                y: Math.max(0, Math.min(newY, 1800)),
+              }
+            : node
+        )
+      );
+    } else if (isPanning) {
+      // Handle canvas panning
+      const deltaX = event.clientX - lastPanPoint.x;
+      const deltaY = event.clientY - lastPanPoint.y;
+
+      setCamera((prev) => {
+        const newX = prev.x + deltaX;
+        const newY = prev.y + deltaY;
+        return constrainCamera(newX, newY);
+      });
+
+      setLastPanPoint({ x: event.clientX, y: event.clientY });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+    setIsDraggingTree(false);
+    setDraggedTreeId(null);
+  };
+
+  // Touch pan handlers
+  const handleTouchStart = (event: React.TouchEvent) => {
+    if (event.touches.length === 1 && !isDraggingTree) {
+      const touch = event.touches[0];
+      setIsPanning(true);
+      setLastPanPoint({ x: touch.clientX, y: touch.clientY });
+    }
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    if (event.touches.length !== 1) return;
+
+    const touch = event.touches[0];
+
+    if (isDraggingTree && draggedTreeId) {
+      // Handle tree dragging
+      event.preventDefault(); // Prevent scrolling
+      const newX = touch.clientX - dragOffset.x - camera.x;
+      const newY = touch.clientY - dragOffset.y - camera.y;
+
+      setGardenNodes((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === draggedTreeId
+            ? {
+                ...node,
+                x: Math.max(0, Math.min(newX, 1800)),
+                y: Math.max(0, Math.min(newY, 1800)),
+              }
+            : node
+        )
+      );
+    } else if (isPanning) {
+      // Handle canvas panning
+      event.preventDefault(); // Prevent scrolling
+      const deltaX = touch.clientX - lastPanPoint.x;
+      const deltaY = touch.clientY - lastPanPoint.y;
+
+      setCamera((prev) => {
+        const newX = prev.x + deltaX;
+        const newY = prev.y + deltaY;
+        return constrainCamera(newX, newY);
+      });
+
+      setLastPanPoint({ x: touch.clientX, y: touch.clientY });
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsPanning(false);
+    setIsDraggingTree(false);
+    setDraggedTreeId(null);
+  };
+
+  // Tree dragging handlers
+  const handleTreeMouseDown = (
+    event: React.MouseEvent,
+    nodeId: string,
+    nodeX: number,
+    nodeY: number
+  ) => {
+    event.stopPropagation(); // Prevent canvas panning
+    setIsDraggingTree(true);
+    setDraggedTreeId(nodeId);
+
+    // Calculate offset from mouse position to tree position
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    // Store the offset from mouse to tree position (accounting for camera)
+    const offsetX = mouseX - (nodeX + camera.x);
+    const offsetY = mouseY - (nodeY + camera.y);
+
+    setDragOffset({ x: offsetX, y: offsetY });
+  };
+
+  const handleTreeTouchStart = (
+    event: React.TouchEvent,
+    nodeId: string,
+    nodeX: number,
+    nodeY: number
+  ) => {
+    if (event.touches.length === 1) {
+      event.stopPropagation(); // Prevent canvas panning
+      const touch = event.touches[0];
+      setIsDraggingTree(true);
+      setDraggedTreeId(nodeId);
+
+      // Calculate offset from touch position to tree position
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+
+      // Store the offset from touch to tree position (accounting for camera)
+      const offsetX = touchX - (nodeX + camera.x);
+      const offsetY = touchY - (nodeY + camera.y);
+
+      setDragOffset({ x: offsetX, y: offsetY });
+    }
   };
 
   const handleSubmit = () => {
@@ -138,6 +297,13 @@ export default function Canvas({
     <>
       <div
         onWheel={handleScroll}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         style={{
           translate: `${camera.x}px ${camera.y}px`,
           position: "absolute",
@@ -146,6 +312,8 @@ export default function Canvas({
           border: "8px solid brown",
           height: "2000px",
           width: "2000px",
+          cursor: isPanning ? "grabbing" : "grab",
+          touchAction: "none", // Prevent default touch behaviors
         }}
       >
         {gardenNodes.map((node) => {
@@ -159,6 +327,12 @@ export default function Canvas({
             <div
               key={node.id}
               className="relative flex flex-col items-center justify-end"
+              onMouseDown={(e) =>
+                handleTreeMouseDown(e, node.id, node.x, node.y)
+              }
+              onTouchStart={(e) =>
+                handleTreeTouchStart(e, node.id, node.x, node.y)
+              }
               style={{
                 position: "absolute",
                 width: node.size,
@@ -167,6 +341,18 @@ export default function Canvas({
                 top: node.y,
                 color: "white",
                 textAlign: "center",
+                cursor:
+                  isDraggingTree && draggedTreeId === node.id
+                    ? "grabbing"
+                    : "grab",
+                userSelect: "none",
+                zIndex: isDraggingTree && draggedTreeId === node.id ? 10 : 1,
+                border:
+                  isDraggingTree && draggedTreeId === node.id
+                    ? "3px solid #3b82f6"
+                    : "3px solid transparent",
+                borderRadius: "12px",
+                boxSizing: "border-box",
               }}
             >
               <Image

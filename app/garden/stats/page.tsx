@@ -38,6 +38,7 @@ import {
   DollarSignIcon,
   FileTextIcon,
   TagIcon,
+  TrashIcon,
 } from "lucide-react";
 
 import {
@@ -50,7 +51,7 @@ import {
   Table,
 } from "@/components/ui/table";
 import { useAtom } from "jotai";
-import { storeAtom, userAtom, Expenses } from "@/lib/jotai-context";
+import { storeAtom, userAtom, Expenses, gardenAtom } from "@/lib/jotai-context";
 import { Badge } from "@/components/ui/badge";
 import {
   BarChart,
@@ -70,6 +71,7 @@ import { toast } from "sonner";
 const StatsPage: React.FC = () => {
   const [expenses, setExpenses] = useAtom(storeAtom);
   const [userPref] = useAtom(userAtom);
+  const [gardenNodes, setGardenNodes] = useAtom(gardenAtom);
 
   // Form state for add expense dialog
   const [date, setDate] = useState<Date>();
@@ -167,6 +169,25 @@ const StatsPage: React.FC = () => {
     setAmount(0);
     setDescription("");
     setSelect("");
+  };
+
+  // Handle expense deletion
+  const handleDeleteExpense = (expenseId: string) => {
+    // Remove expense from expenses array
+    setExpenses(expenses.filter((expense) => expense.id !== expenseId));
+
+    // Update garden nodes - remove the expense ID from any nodes that reference it
+    setGardenNodes(
+      (prevNodes) =>
+        prevNodes
+          .map((node) => ({
+            ...node,
+            expenseIds: node.expenseIds.filter((id) => id !== expenseId),
+          }))
+          .filter((node) => node.expenseIds.length > 0) // Remove nodes with no expenses
+    );
+
+    toast.success("Expense deleted successfully!");
   };
 
   type Category =
@@ -448,6 +469,9 @@ const StatsPage: React.FC = () => {
                 <TableHead className="text-main font-bold text-right">
                   Amount
                 </TableHead>
+                <TableHead className="text-main font-bold text-center w-20">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -467,12 +491,22 @@ const StatsPage: React.FC = () => {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">{expense.amount}</TableCell>
+                  <TableCell className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteExpense(expense.id)}
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={3}>Total</TableCell>
+                <TableCell colSpan={4}>Total</TableCell>
                 <TableCell className="text-right">
                   {userPref.symbol}
                   {expenses
