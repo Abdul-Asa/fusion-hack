@@ -1,33 +1,25 @@
 "use client";
 import {
-  ArrowBigRight,
-  ArrowBigLeft,
   Flower2,
   BarChart,
-  Import,
   ImportIcon,
   Settings,
-  LogOutIcon,
-  HomeIcon,
   ReceiptIcon,
-  DeleteIcon,
-  Trash,
+  InfoIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export default function Sidebar() {
-  const [trigger, setTrigger] = useState(false);
-
   return (
     <nav className="h-screen pl-16 py-10 w-72 font-chivo text-main ">
       <div className="flex flex-col">
-        <h1 className="mb-10 text-2xl font-francues flex items-center">
+        <Link
+          className="mb-10 text-2xl font-francues flex items-center"
+          href="/"
+        >
           <ReceiptIcon size={30} className="mr-2" />
           Money Trees
-        </h1>
+        </Link>
         <ul className="flex flex-col gap-8">
           <Link className="hover:underline flex items-center" href="/garden">
             <Flower2 size={20} className="mr-2" />
@@ -56,26 +48,11 @@ export default function Sidebar() {
           </Link>
           <Link
             className="hover:underline flex items-center"
-            href="/garden/visit"
+            href="/garden/about"
           >
-            <LogOutIcon size={20} className="mr-2" />
-            Visit
+            <InfoIcon size={20} className="mr-2" />
+            About
           </Link>
-          <Link className="hover:underline flex items-center" href="/">
-            <HomeIcon size={20} className="mr-2" />
-            Home
-          </Link>
-          <button
-            className="hover:underline flex items-center text-red-500"
-            onClick={() => {
-              localStorage.removeItem("user");
-              localStorage.removeItem("expenses");
-              toast.info("Data deleted");
-            }}
-          >
-            <Trash size={20} className="mr-2" />
-            Delete Data
-          </button>
         </ul>
       </div>
     </nav>

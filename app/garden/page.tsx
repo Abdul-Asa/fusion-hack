@@ -1,10 +1,7 @@
 "use client";
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { userAtom } from "@/lib/jotai-context";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { useSync } from "@/lib/hooks/use-sync";
 import { Card } from "@/components/ui/card";
 import { MobileMenu } from "@/components/mobile-menu";
 import Canvas from "@/components/canvas";

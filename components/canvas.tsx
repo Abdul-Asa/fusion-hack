@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
-import { CalendarIcon, HandIcon, HandshakeIcon, PlusIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  HandIcon,
+  HandshakeIcon,
+  PlusIcon,
+  DollarSignIcon,
+  FileTextIcon,
+  TagIcon,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import { useAtom } from "jotai";
 import { storeAtom } from "@/lib/jotai-context";
@@ -82,14 +90,31 @@ export default function Canvas({
   const [chosenId2, setChosenId2] = useState("");
 
   const [keyIsDown, setKeyIsDown] = useState(false);
-  const listCat = [
-    "Food",
-    "Transport",
-    "Bills",
-    "Entertainment",
-    "Shopping",
-    "Fashion",
-    "Misc",
+  const categories = [
+    {
+      name: "Food",
+      color: "#008000",
+    },
+    {
+      name: "Transport",
+      color: "#0000FF",
+    },
+    {
+      name: "Bills",
+      color: "#FF0000",
+    },
+    {
+      name: "Entertainment",
+      color: "#800080",
+    },
+    {
+      name: "Shopping",
+      color: "#FFD700",
+    },
+    {
+      name: "Misc",
+      color: "#808080",
+    },
   ];
   useEffect(() => {
     const handleKeyDown = () => setKeyIsDown(true);
@@ -112,9 +137,10 @@ export default function Canvas({
     "/bush.png",
     "/aut-big.png",
   ];
-  const categoryImagePairs = listCat.map((category, index) => ({
-    category,
+  const categoryImagePairs = categories.map((category, index) => ({
+    category: category.name,
     imgSrc: imgSrcs[index],
+    color: category.color,
   }));
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -336,26 +362,104 @@ export default function Canvas({
               <PlusIcon />
             </Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add a new expense</DialogTitle>
-              <DialogDescription>Record your latest expense</DialogDescription>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="text-center pb-4">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-main">
+                <DollarSignIcon className="h-6 w-6 text-white" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-gray-900">
+                Add New Expense
+              </DialogTitle>
+              <DialogDescription className="text-gray-500">
+                Track your spending and grow your financial garden
+              </DialogDescription>
             </DialogHeader>
 
-            <div className="grid gap-4 py-4">
-              <div className="grid items-center grid-cols-4 gap-4">
-                <Label htmlFor="description" className="text-right">
+            <div className="space-y-6">
+              {/* Description Field */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="description"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <FileTextIcon className="h-4 w-4 text-gray-500" />
                   Description
                 </Label>
                 <Input
                   id="description"
+                  placeholder="What did you spend on?"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="col-span-3"
                 />
               </div>
-              <div className="grid items-center grid-cols-4 gap-4">
-                <Label htmlFor="date" className="text-right">
+
+              {/* Amount Field */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="amount"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <DollarSignIcon className="h-4 w-4 text-gray-500" />
+                  Amount
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={amount || ""}
+                    onChange={(e) => setAmount(Number(e.target.value))}
+                    className="pl-8"
+                  />
+                  <DollarSignIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                </div>
+              </div>
+
+              {/* Category Field */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="category"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <TagIcon className="h-4 w-4 text-gray-500" />
+                  Category
+                </Label>
+                <Select value={select} onValueChange={(val) => setSelect(val)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                        Expense Categories
+                      </SelectLabel>
+                      {categories.map((category, index) => (
+                        <SelectItem
+                          value={category.name.toLowerCase()}
+                          key={index}
+                          className="py-3"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: category.color }}
+                            ></div>
+                            {category.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date Field */}
+              <div className="space-y-2">
+                <Label
+                  htmlFor="date"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
+                >
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
                   Date
                 </Label>
                 <Popover>
@@ -363,15 +467,15 @@ export default function Canvas({
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-[280px] justify-start text-left font-normal",
+                        "w-full h-11 justify-start text-left font-normal border-gray-200 hover:border-gray-300",
                         !date && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
+                      {date ? format(date, "PPP") : <span>Select a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={date}
@@ -381,45 +485,19 @@ export default function Canvas({
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="grid items-center grid-cols-4 gap-4">
-                <Label htmlFor="amount" className="text-right">
-                  Amount
-                </Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid items-center grid-cols-4 gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
-                </Label>
-                <Select value={select} onValueChange={(val) => setSelect(val)}>
-                  <SelectTrigger className="w-full col-span-3">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Categories</SelectLabel>
-                      {listCat.map((expense, index) => (
-                        <SelectItem value={expense.toLowerCase()} key={index}>
-                          {expense}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="pt-6">
+              <DialogClose asChild>
+                <Button variant="outline" className="flex-1 h-11">
+                  Cancel
+                </Button>
+              </DialogClose>
               <DialogClose asChild>
                 <Button
                   disabled={!date || !select || !amount || !description}
                   onClick={handleSubmit}
+                  className="flex-1 h-11"
                 >
                   Add Expense
                 </Button>

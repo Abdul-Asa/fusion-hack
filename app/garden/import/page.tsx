@@ -9,7 +9,6 @@ import { parse } from "csv-parse";
 import { stringify } from "csv-stringify";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { MobileMenu } from "@/components/mobile-menu";
 
 const Import: React.FC = () => {
@@ -131,9 +130,9 @@ const Import: React.FC = () => {
       <div className="flex gap-6 h-full flex-col">
         <Card {...getRootProps()} className=" flex-grow">
           <input {...getInputProps()} />
-          <div className="justify-center flex flex-col gap-4 items-center h-full ">
+          <div className="justify-center flex flex-col gap-4 items-center h-full cursor-pointer group ">
             <ImportIcon className="opacity-50 text-main" size={100} />
-            <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer">
+            <p className="text-main lg:text-2xl text-center text-lg ml-4 group-hover:underline">
               Import your CSV file
             </p>
             <p className="text-gray-500 lg:text-sm text-xs max-w-lg text-center ml-4">
@@ -148,11 +147,11 @@ const Import: React.FC = () => {
         </Card>
         <Card className=" flex-grow">
           <div
-            className="justify-center flex flex-col gap-4 items-center h-full "
+            className="justify-center flex flex-col gap-4 items-center h-full cursor-pointer group"
             onClick={handleExport}
           >
             <PackageIcon className="opacity-50 text-main" size={100} />
-            <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer">
+            <p className="text-main lg:text-2xl text-center text-lg ml-4 cursor-pointer group-hover:underline">
               Export your data as a CSV file
             </p>
           </div>

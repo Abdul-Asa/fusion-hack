@@ -1,12 +1,37 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAtom } from "jotai";
 import { userAtom } from "@/lib/jotai-context";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useSync } from "@/lib/hooks/use-sync";
-import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { MobileMenu } from "@/components/mobile-menu";
+import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 const Setup: React.FC = () => {
   const [userPref, setUserPref] = useAtom(userAtom);
@@ -19,8 +44,19 @@ const Setup: React.FC = () => {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setUserPref({ name, currency, symbol });
-    // saveToLocalStorage();
+    toast.success("Settings saved successfully!");
     router.push("/garden/");
+  };
+
+  const handleDeleteData = () => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("expenses");
+    toast.success("All data deleted successfully");
+    // Reset form state
+    setName("");
+    setCurrency("");
+    setSymbol("");
+    setUserPref({ name: "", currency: "", symbol: "" });
   };
   const currencies = [
     {
@@ -46,51 +82,122 @@ const Setup: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-full lg:p-10 p-6">
-      <div className="flex justify-between mb-2 lg:mb-10 items-center">
-        <h1 className="lg:text-3xl text-lg text-main">Setup</h1>
+    <div className="flex flex-col h-full lg:p-10 p-6 space-y-6">
+      <div className="flex justify-between mb-2 lg:mb-6 items-center">
+        <h1 className="lg:text-3xl text-lg font-semibold text-main">
+          Settings
+        </h1>
         <MobileMenu />
       </div>
+
+      {/* User Settings Card */}
       <Card>
-        <form onSubmit={handleSubmit} className="lg:m-10   space-y-8">
-          <label className="flex flex-col ">
-            <p className="pb-2">Enter your name:</p>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border-2 border-gray-300 rounded-md max-w-lg p-2"
-            />
-          </label>
-          <label className="flex flex-col lg:pb-10">
-            <p className="pb-2">Choose your currency:</p>
-            <div className="flex w-full flex-col lg:flex-row gap-2 justify-evenly ">
-              {currencies.map((currencyOption) => (
-                <div
-                  key={currencyOption.name}
-                  onClick={() => {
-                    setSymbol(currencyOption.symbol);
-                    setCurrency(currencyOption.name);
-                  }}
-                  className={`flex items-center box-border flex-col lg:p-8 p-2 rounded-md cursor-pointer hover:bg-gray-100 ${
-                    currency === currencyOption.name
-                      ? "border-main border-2"
-                      : "border"
-                  }`}
-                >
-                  <span className=" lg:text-2xl">{currencyOption.symbol}</span>
-                  <span>{currencyOption.name}</span>
-                </div>
-              ))}
+        <CardHeader>
+          <CardTitle className="text-xl text-main">
+            Personal Information
+          </CardTitle>
+          <CardDescription>
+            Update your personal details and currency preferences
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your name"
+                className="max-w-lg"
+              />
             </div>
-          </label>
-          <Button type="submit" disabled={!name || !currency || !symbol}>
-            Save
-          </Button>
-        </form>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Select
+                value={currency}
+                onValueChange={(value) => {
+                  setCurrency(value);
+                  const selectedCurrency = currencies.find(
+                    (c) => c.name === value
+                  );
+                  if (selectedCurrency) {
+                    setSymbol(selectedCurrency.symbol);
+                  }
+                }}
+              >
+                <SelectTrigger className="max-w-lg">
+                  <SelectValue placeholder="Select your currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencies.map((currencyOption) => (
+                    <SelectItem
+                      key={currencyOption.name}
+                      value={currencyOption.name}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{currencyOption.symbol}</span>
+                        <span>{currencyOption.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={!name || !currency || !symbol}
+              className="w-full lg:w-auto"
+            >
+              Save Settings
+            </Button>
+          </form>
+        </CardContent>
       </Card>
+
+      {/* Delete Data Card */}
+      <Card className="border-destructive/20">
+        <CardHeader>
+          <CardTitle className="text-xl text-destructive flex items-center gap-2">
+            <Trash2 size={20} />
+            Danger Zone
+          </CardTitle>
+          <CardDescription>
+            Permanently delete all your data. This action cannot be undone.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="destructive" className="w-full lg:w-auto">
+                <Trash2 size={16} className="mr-2" />
+                Delete All Data
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete all
+                  your expenses, user data, and settings from local storage.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button variant="outline">Cancel</Button>
+                <Button variant="destructive" onClick={handleDeleteData}>
+                  Yes, delete everything
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardContent>
+      </Card>
+
       <p className="lg:block hidden text-xs text-center pt-10 text-main">
-        A certified Shehu Product
+        Made with 💜 by Shehu
       </p>
     </div>
   );
