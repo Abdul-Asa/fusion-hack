@@ -339,7 +339,7 @@ export default function Canvas({
           );
         })}
       </motion.div>
-      <div className="absolute top-2 left-2">
+      <div className="absolute flex gap-2 top-2 left-2">
         <Button
           variant={panMode ? "default" : "outline"}
           size={"icon"}

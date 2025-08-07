@@ -35,7 +35,6 @@ Money Trees is built around the **"File Over App"** philosophy, as championed by
 - **Import**: Seamlessly import existing financial data via CSV
 - **Export**: Download your complete financial history anytime
 - **Multi-Currency**: Support for USD, EUR, GBP, JPY, NGN, and more
-- **Real-time Sync**: Collaborative features using Liveblocks technology
 
 ### 🎯 Smart Organization
 
@@ -50,7 +49,6 @@ Money Trees leverages modern, reliable technologies while maintaining data porta
 - **Frontend**: Next.js 14, React 18, TypeScript
 - **Styling**: Tailwind CSS with custom animations
 - **State Management**: Jotai for reactive state
-- **Real-time Features**: Liveblocks for collaboration
 - **Data Processing**: CSV parsing and generation
 - **UI Components**: Radix UI for accessibility
 - **Visualization**: Custom canvas implementation with Spline integration
@@ -81,7 +79,6 @@ Money Trees leverages modern, reliable technologies while maintaining data porta
 
    ```bash
    cp .env.example .env.local
-   # Add your Liveblocks public key
    ```
 
 4. **Run the development server**
@@ -169,7 +166,6 @@ npm start
 - **Next.js**: Modern React framework with excellent performance
 - **CSV**: Universal, human-readable data format that will outlast any proprietary format
 - **Jotai**: Atomic state management for predictable data flow
-- **Liveblocks**: Real-time collaboration without compromising data ownership
 - **TypeScript**: Type safety for robust financial calculations
 
 ### File Structure Philosophy

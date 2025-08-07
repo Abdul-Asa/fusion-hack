@@ -370,7 +370,7 @@ const StatsPage: React.FC = () => {
                   cy="50%"
                   outerRadius="80%"
                   label={(entry) =>
-                    `${userPref.symbol}${entry.value.toFixed(2)}`
+                    `${userPref.symbol}${(entry.value || 0).toFixed(2)}`
                   }
                 >
                   {data1.map((entry, index) => (
