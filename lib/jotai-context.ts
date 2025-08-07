@@ -1,4 +1,3 @@
-import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 export const userAtom = atomWithStorage("user", {
   name: "Asa",
@@ -6,6 +5,17 @@ export const userAtom = atomWithStorage("user", {
   symbol: "$",
 });
 export const storeAtom = atomWithStorage<Expenses[]>("expenses", []);
+
+export type GardenNode = {
+  id: string;
+  category: string;
+  x: number;
+  y: number;
+  size: number;
+  expenseIds: string[];
+};
+
+export const gardenAtom = atomWithStorage<GardenNode[]>("gardenNodes", []);
 
 export type UserType = {
   name: string;

@@ -32,13 +32,14 @@ import {
 import { MobileMenu } from "@/components/mobile-menu";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { currencies } from "@/lib/constants";
 
 const Setup: React.FC = () => {
   const [userPref, setUserPref] = useAtom(userAtom);
   const [name, setName] = useState(userPref.name || "");
   const [currency, setCurrency] = useState(userPref.currency || "");
   const [symbol, setSymbol] = useState(userPref.symbol || "");
-  // const { saveToLocalStorage } = useSync();
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   const handleSubmit = (event: React.FormEvent) => {
@@ -49,37 +50,16 @@ const Setup: React.FC = () => {
   };
 
   const handleDeleteData = () => {
-    localStorage.removeItem("user");
+    setUserPref({ name: "User", currency: "USD", symbol: "$" });
+    setName("User");
+    setCurrency("USD");
+    setSymbol("$");
     localStorage.removeItem("expenses");
+    localStorage.removeItem("gardenNodes");
     toast.success("All data deleted successfully");
     // Reset form state
-    setName("");
-    setCurrency("");
-    setSymbol("");
-    setUserPref({ name: "", currency: "", symbol: "" });
+    setOpen(false);
   };
-  const currencies = [
-    {
-      name: "USD",
-      symbol: "$",
-    },
-    {
-      name: "EUR",
-      symbol: "€",
-    },
-    {
-      name: "GBP",
-      symbol: "£",
-    },
-    {
-      name: "JPY",
-      symbol: "¥",
-    },
-    {
-      name: "NGN",
-      symbol: "₦",
-    },
-  ];
 
   return (
     <div className="flex flex-col h-full lg:p-10 p-6 space-y-6">
@@ -170,7 +150,7 @@ const Setup: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button variant="destructive" className="w-full lg:w-auto">
                 <Trash2 size={16} className="mr-2" />

@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className={`${fraunces.variable} ${chivo.variable}`}>
         <Provider>
           {children}
-          <Toaster position="top-right" richColors />
+          <Toaster position="bottom-right" richColors />
         </Provider>
       </body>
     </html>

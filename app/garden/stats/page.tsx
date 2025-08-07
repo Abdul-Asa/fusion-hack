@@ -454,7 +454,7 @@ const StatsPage: React.FC = () => {
               {expenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell>{expense.date}</TableCell>
-                  <TableCell>{expense.description}</TableCell>{" "}
+                  <TableCell>{expense.description}</TableCell>
                   <TableCell>
                     <Badge
                       style={{

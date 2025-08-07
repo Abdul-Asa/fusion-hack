@@ -15,87 +15,97 @@ const Import: React.FC = () => {
   const [expenseList, setExpensesList] = useAtom(storeAtom);
   const router = useRouter();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file: File) => {
-      if (file.type !== "text/csv") {
-        console.error("Invalid file type");
-        toast.error("Invalid file type");
-        return;
-      }
-
-      const loadingId = toast.loading("Loading data");
-      const reader = new FileReader();
-
-      reader.onerror = () => {
-        toast.error("Error reading file");
-        console.error(reader.error);
-      };
-      reader.onabort = () => {
-        toast.error("File reading aborted");
-        console.error("File reading aborted");
-      };
-      reader.onload = () => {
-        const result = reader.result;
-        if (result) {
-          parse(
-            result as string,
-            {
-              columns: true,
-              skip_empty_lines: true,
-            },
-            (err, data) => {
-              if (err) {
-                console.error(err);
-                toast.error("Error parsing CSV");
-                return;
-              }
-
-              // Check if necessary headers are present
-              const requiredHeaders = [
-                "description",
-                "amount",
-                "date",
-                "category",
-              ];
-              const headers = Object.keys(data[0]);
-              const missingHeaders = requiredHeaders.filter(
-                (h) => !headers.includes(h)
-              );
-              if (missingHeaders.length > 0) {
-                toast.error(
-                  `Invalid CSV. Missing headers: ${missingHeaders.join(", ")}`
-                );
-                console.error(`Missing headers: ${missingHeaders.join(", ")}`);
-                return;
-              }
-
-              // Convert data to Expense objects
-              const expenses: Expenses[] = data.map((row: any) => ({
-                description: row.description,
-                amount: Number(row.amount),
-                date: row.date,
-                id: crypto.randomUUID(),
-                category: row.category,
-              }));
-
-              setExpensesList([...expenseList, ...expenses]);
-              toast.success("CSV file imported successfully", {
-                action: {
-                  label: "Go to garden",
-                  onClick: () => {
-                    router.push("/garden");
-                  },
-                },
-              });
-            }
-          );
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      acceptedFiles.forEach((file: File) => {
+        if (file.type !== "text/csv") {
+          console.error("Invalid file type");
+          toast.error("Invalid file type");
+          return;
         }
-        toast.dismiss(loadingId);
-      };
 
-      reader.readAsText(file);
-    });
-  }, []);
+        const loadingId = toast.loading("Loading data");
+        const reader = new FileReader();
+
+        reader.onerror = () => {
+          toast.error("Error reading file");
+          console.error(reader.error);
+        };
+        reader.onabort = () => {
+          toast.error("File reading aborted");
+          console.error("File reading aborted");
+        };
+        reader.onload = () => {
+          const result = reader.result;
+          if (result) {
+            parse(
+              result as string,
+              {
+                columns: true,
+                skip_empty_lines: true,
+              },
+              (err: unknown, data: any[]) => {
+                if (err) {
+                  console.error(err);
+                  toast.error("Error parsing CSV");
+                  return;
+                }
+
+                if (!Array.isArray(data) || data.length === 0) {
+                  toast.error("CSV is empty or invalid");
+                  return;
+                }
+
+                // Check if necessary headers are present
+                const requiredHeaders = [
+                  "description",
+                  "amount",
+                  "date",
+                  "category",
+                ];
+                const headers = Object.keys(data[0] as Record<string, unknown>);
+                const missingHeaders = requiredHeaders.filter(
+                  (h) => !headers.includes(h)
+                );
+                if (missingHeaders.length > 0) {
+                  toast.error(
+                    `Invalid CSV. Missing headers: ${missingHeaders.join(", ")}`
+                  );
+                  console.error(
+                    `Missing headers: ${missingHeaders.join(", ")}`
+                  );
+                  return;
+                }
+
+                // Convert data to Expense objects
+                const expenses: Expenses[] = data.map((row: any) => ({
+                  description: row.description,
+                  amount: Number(row.amount),
+                  date: row.date,
+                  id: crypto.randomUUID(),
+                  category: row.category,
+                }));
+
+                setExpensesList((prev) => [...prev, ...expenses]);
+                toast.success("CSV file imported successfully", {
+                  action: {
+                    label: "Go to garden",
+                    onClick: () => {
+                      router.push("/garden");
+                    },
+                  },
+                });
+              }
+            );
+          }
+          toast.dismiss(loadingId);
+        };
+
+        reader.readAsText(file);
+      });
+    },
+    [router, setExpensesList]
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,

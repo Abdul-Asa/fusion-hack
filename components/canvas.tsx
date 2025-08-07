@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import {
   CalendarIcon,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAtom } from "jotai";
-import { storeAtom } from "@/lib/jotai-context";
+import { storeAtom, gardenAtom, type GardenNode } from "@/lib/jotai-context";
 import {
   Dialog,
   DialogClose,
@@ -37,39 +37,18 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "./ui/calendar";
-import { format, set } from "date-fns";
+import { format } from "date-fns";
+import { categories, categoryImagePairs } from "@/lib/constants";
 
 export default function Canvas({
   height,
   width,
-  children,
 }: {
   height: number;
   width: number;
-  children?: React.ReactNode;
 }) {
   const [expenses, setExpenses] = useAtom(storeAtom);
-  const [date, setDate] = useState<Date>();
-  const [store, setStore] = useState<
-    {
-      id: string;
-      category: string;
-      x: number;
-      y: number;
-      size: number;
-      merged: string[];
-    }[]
-  >(
-    expenses.map((act) => ({
-      x: Math.random() * 1000,
-      y: Math.random() * 1000,
-      id: act.id,
-      category: act.category,
-      size: 200,
-      merged: [],
-    }))
-  );
-
+  const [gardenNodes, setGardenNodes] = useAtom(gardenAtom);
   const [camera, setCamera] = useState<{
     x: number;
     y: number;
@@ -83,70 +62,22 @@ export default function Canvas({
   });
   const [panMode, setPanMode] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [select, setSelect] = useState("");
-  const [amount, setAmount] = useState(0);
-  const [description, setDescription] = useState("");
-  const [chosenId, setChosenId] = useState("");
-  const [chosenId2, setChosenId2] = useState("");
-
-  const [keyIsDown, setKeyIsDown] = useState(false);
-  const categories = [
-    {
-      name: "Food",
-      color: "#008000",
-    },
-    {
-      name: "Transport",
-      color: "#0000FF",
-    },
-    {
-      name: "Bills",
-      color: "#FF0000",
-    },
-    {
-      name: "Entertainment",
-      color: "#800080",
-    },
-    {
-      name: "Shopping",
-      color: "#FFD700",
-    },
-    {
-      name: "Misc",
-      color: "#808080",
-    },
-  ];
-  useEffect(() => {
-    const handleKeyDown = () => setKeyIsDown(true);
-    const handleKeyUp = () => setKeyIsDown(false);
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
-  const imgSrcs = [
-    "/tang-big.png",
-    "/white-big.png",
-    "/palm-big.png",
-    "/spooky-big.png",
-    "/last.png",
-    "/bush.png",
-    "/aut-big.png",
-  ];
-  const categoryImagePairs = categories.map((category, index) => ({
-    category: category.name,
-    imgSrc: imgSrcs[index],
-    color: category.color,
-  }));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [form, setForm] = useState<{
+    description: string;
+    amount: number;
+    category: string;
+    date: Date | undefined;
+  }>({
+    description: "",
+    amount: 0,
+    category: "",
+    date: undefined,
+  });
 
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (event: React.WheelEvent) => {
-    console.log("scrolling");
     setCamera((prev) => {
       let newX = prev.x - event.deltaX;
       let newY = prev.y - event.deltaY;
@@ -164,10 +95,6 @@ export default function Canvas({
   };
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    console.log("onPointerDown");
-    setChosenId("");
-    setChosenId2("");
-    // setSelectedLayer(null);
     if (!panMode) return;
     setIsDragging(true);
     setCamera((prev) => ({
@@ -200,77 +127,83 @@ export default function Canvas({
   const onPointerUp = () => {
     setIsDragging(false);
   };
+
   const handleSubmit = () => {
-    setExpenses([
-      ...expenses,
+    const newExpenseId = crypto.randomUUID();
+    setExpenses((prev) => [
+      ...prev,
       {
-        id: crypto.randomUUID(),
-        date: format(date!, "yyyy-MM-dd"),
-        category: select,
-        amount: amount,
-        description: description,
+        id: newExpenseId,
+        date: format(form.date!, "yyyy-MM-dd"),
+        category: form.category,
+        amount: form.amount,
+        description: form.description,
       },
     ]);
-    setStore([
-      ...store,
+
+    setGardenNodes((prev) => [
+      ...prev,
       {
         id: crypto.randomUUID(),
-        category: select,
+        category: form.category,
         x: Math.random() * 1000,
         y: Math.random() * 1000,
         size: 200,
-        merged: [],
+        expenseIds: [newExpenseId],
       },
     ]);
+
+    setForm({
+      description: "",
+      amount: 0,
+      category: "",
+      date: undefined,
+    });
   };
+
   const handleMerge = () => {
-    if (chosenId === "" || chosenId2 === "") return;
+    return;
+    // if (chosenId === "" || chosenId2 === "") return;
 
-    const item1 = store.find((item) => item.id === chosenId);
-    const item2 = store.find((item) => item.id === chosenId2);
+    // const item1 = gardenNodes.find((item) => item.id === chosenId);
+    // const item2 = gardenNodes.find((item) => item.id === chosenId2);
 
-    if (!item1 || !item2) return;
-    if (
-      item1.category !== item2.category ||
-      item1.merged.length !== item2.merged.length
-    )
-      return;
+    // if (!item1 || !item2) return;
+    // if (item1.category !== item2.category) return;
 
-    if (item1.merged.length > 1 && item2.merged.length > 1) {
-      const merged = [...item1.merged, ...item2.merged];
-      const mergedItem = {
-        id: crypto.randomUUID(),
-        category: item1.category,
-        x: (item1.x + item2.x) / 2,
-        y: (item1.y + item2.y) / 2,
-        size: item1.size + item2.size,
-        merged,
-      };
-      setStore((prev) => {
-        const newStore = prev.filter(
-          (item) => item.id !== item1.id && item.id !== item2.id
-        );
-        return [...newStore, mergedItem];
-      });
-    } else {
-      const newId = crypto.randomUUID();
-      const newSize = item1.size + 100;
+    // const mergedItem: GardenNode = {
+    //   id: crypto.randomUUID(),
+    //   category: item1.category,
+    //   x: (item1.x + item2.x) / 2,
+    //   y: (item1.y + item2.y) / 2,
+    //   size: item1.size + item2.size,
+    //   expenseIds: Array.from(
+    //     new Set([...(item1.expenseIds || []), ...(item2.expenseIds || [])])
+    //   ),
+    // };
+    // setGardenNodes((prev) => {
+    //   const filtered = prev.filter(
+    //     (n) => n.id !== item1.id && n.id !== item2.id
+    //   );
+    //   return [...filtered, mergedItem];
+    // });
 
-      setStore((prev) => [
-        ...prev.filter((item) => item.id !== item1.id && item.id !== item2.id),
-        {
-          id: newId,
-          category: item1.category,
-          x: Math.random() * 1000,
-          y: Math.random() * 1000,
-          size: newSize,
-          merged: [item1.id, item2.id],
-        },
-      ]);
-    }
+    // setChosenId("");
+    // setChosenId2("");
+  };
 
-    setChosenId("");
-    setChosenId2("");
+  const handleNodeDrag = (id: string, deltaX: number, deltaY: number) => {
+    setGardenNodes((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? {
+              ...n,
+              x: n.x + deltaX,
+              y: n.y + deltaY,
+            }
+          : n
+      )
+    );
   };
 
   return (
@@ -291,50 +224,48 @@ export default function Canvas({
           width: "2000px",
         }}
       >
-        {store.map((expense, index) => {
+        {gardenNodes.map((node) => {
           const expenseImageSrc =
             categoryImagePairs.find(
               (pair) =>
-                pair.category.toLowerCase() === expense.category.toLowerCase()
+                pair.category.toLowerCase() === node.category.toLowerCase()
             )?.imgSrc || "";
 
           return (
             <motion.div
-              className={`flex flex-col items-center justify-between ${
-                chosenId === expense.id || chosenId2 === expense.id
-                  ? "border-2 border-main "
-                  : ""
+              key={node.id}
+              className={`relative flex flex-col items-center justify-end ${
+                selectedId === node.id ? "border-2 border-main" : ""
               }`}
               drag
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.preventDefault();
-                if (keyIsDown) {
-                  if (chosenId === "") {
-                    setChosenId(expense.id);
-                  } else if (chosenId2 === "") {
-                    setChosenId2(expense.id);
-                  }
-                }
+                setSelectedId(node.id);
               }}
+              onDrag={(e, info) =>
+                handleNodeDrag(node.id, info.delta.x, info.delta.y)
+              }
               dragMomentum={false}
               dragConstraints={containerRef}
               style={{
-                width: expense.size,
-                height: expense.size,
-                x: expense.x,
-                y: expense.y,
+                width: node.size,
+                height: node.size,
+                x: node.x,
+                y: node.y,
                 color: "white",
                 textAlign: "center",
               }}
-              key={index}
             >
               <Image
-                alt={"tree:" + expense.category}
+                alt={"tree:" + node.category}
                 src={expenseImageSrc}
                 draggable={false}
                 fill
               />
-              {/* {expense.category} */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 mb-1 bg-black/60 text-white text-xs px-2 py-0.5 rounded">
+                {JSON.stringify(node)}
+              </div>
             </motion.div>
           );
         })}
@@ -347,11 +278,7 @@ export default function Canvas({
         >
           <HandIcon />
         </Button>
-        <Button
-          disabled={chosenId[0] === "" || chosenId[1] === ""}
-          size={"icon"}
-          onClick={handleMerge}
-        >
+        <Button size={"icon"} onClick={handleMerge}>
           <HandshakeIcon />
         </Button>
       </div>
@@ -388,8 +315,10 @@ export default function Canvas({
                 <Input
                   id="description"
                   placeholder="What did you spend on?"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm({ ...form, description: e.target.value })
+                  }
                 />
               </div>
 
@@ -407,8 +336,10 @@ export default function Canvas({
                     id="amount"
                     type="number"
                     placeholder="0.00"
-                    value={amount || ""}
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    value={form.amount || ""}
+                    onChange={(e) =>
+                      setForm({ ...form, amount: Number(e.target.value) })
+                    }
                     className="pl-8"
                   />
                   <DollarSignIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -424,7 +355,10 @@ export default function Canvas({
                   <TagIcon className="h-4 w-4 text-gray-500" />
                   Category
                 </Label>
-                <Select value={select} onValueChange={(val) => setSelect(val)}>
+                <Select
+                  value={form.category}
+                  onValueChange={(val) => setForm({ ...form, category: val })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Choose a category" />
                   </SelectTrigger>
@@ -468,19 +402,25 @@ export default function Canvas({
                       variant={"outline"}
                       className={cn(
                         "w-full h-11 justify-start text-left font-normal border-gray-200 hover:border-gray-300",
-                        !date && "text-muted-foreground"
+                        !form.date && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="w-4 h-4 mr-2 text-gray-400" />
-                      {date ? format(date, "PPP") : <span>Select a date</span>}
+                      {form.date ? (
+                        format(form.date, "PPP")
+                      ) : (
+                        <span>Select a date</span>
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      initialFocus
+                      selected={form.date}
+                      onSelect={(date) =>
+                        setForm({ ...form, date: date || undefined })
+                      }
+                      autoFocus
                     />
                   </PopoverContent>
                 </Popover>
@@ -495,7 +435,12 @@ export default function Canvas({
               </DialogClose>
               <DialogClose asChild>
                 <Button
-                  disabled={!date || !select || !amount || !description}
+                  disabled={
+                    !form.date ||
+                    !form.category ||
+                    !form.amount ||
+                    !form.description
+                  }
                   onClick={handleSubmit}
                   className="flex-1 h-11"
                 >

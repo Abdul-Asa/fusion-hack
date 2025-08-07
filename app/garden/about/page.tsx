@@ -2,16 +2,8 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { MobileMenu } from "@/components/mobile-menu";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import {
-  ExternalLink,
-  FileText,
-  Shield,
-  Zap,
-  Users,
-  Download,
-} from "lucide-react";
+import { FileText } from "lucide-react";
 
 const About: React.FC = () => {
   return (
@@ -33,7 +25,7 @@ const About: React.FC = () => {
               maintain complete control over your data.
             </p>
             <p className="text-emerald-600 italic">
-              "A dollar might turn to a million and we all rich"
+              &ldquo;A dollar might turn to a million and we all rich&rdquo;
             </p>
           </div>
         </Card>
@@ -46,9 +38,9 @@ const About: React.FC = () => {
           </h3>
           <div className="bg-emerald-50 border-l-4 border-emerald-500 p-6 rounded-r-lg mb-6">
             <p className="text-gray-700 italic leading-relaxed mb-4">
-              "File over app is a philosophy: if you want to create digital
-              artifacts that last, they must be files you can control, in
-              formats that are easy to retrieve and read."
+              &ldquo;File over app is a philosophy: if you want to create
+              digital artifacts that last, they must be files you can control,
+              in formats that are easy to retrieve and read.&rdquo;
             </p>
             <p className="text-emerald-600 font-medium">
               — Steph Ango, CEO of Obsidian

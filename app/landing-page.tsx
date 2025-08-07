@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import CurrencyBadge from "@/components/ui/currency-badge";
+import { currencies } from "@/lib/constants";
 import { Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -171,11 +172,13 @@ export default function LandingPage() {
                   Supported Currencies
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  <CurrencyBadge currency="USD" symbol="$" />
-                  <CurrencyBadge currency="EUR" symbol="€" />
-                  <CurrencyBadge currency="GBP" symbol="£" />
-                  <CurrencyBadge currency="JPY" symbol="¥" />
-                  <CurrencyBadge currency="NGN" symbol="₦" />
+                  {currencies.map((currency) => (
+                    <CurrencyBadge
+                      key={currency.name}
+                      currency={currency.name}
+                      symbol={currency.symbol}
+                    />
+                  ))}
                 </div>
               </div>
             </div>
