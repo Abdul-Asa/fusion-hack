@@ -24,7 +24,7 @@ const About: React.FC = () => {
               maintain complete control over your data.
             </p>
             <p className="text-emerald-600 italic">
-              &ldquo;A dollar might turn to a million and we all rich&rdquo;
+              &ldquo;A penny saved is a penny earned&rdquo;
             </p>
           </div>
         </Card>
@@ -143,7 +143,7 @@ const About: React.FC = () => {
       </div>
 
       <p className="lg:block hidden text-xs text-center pt-10 text-main">
-        Made with 💜 by Shehu — A certified Shehu Product
+        Made with 💜 by Shehu
       </p>
     </div>
   );
