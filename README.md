@@ -36,29 +36,17 @@ Money Trees is built around the **"File Over App"** philosophy, as championed by
 - **Export**: Download your complete financial history anytime
 - **Multi-Currency**: Support for USD, EUR, GBP, JPY, NGN, and more
 
-### 🎯 Smart Organization
-
-- Track expenses by category, date, and amount
-- Built-in statistics and growth visualization
-- Mobile-responsive design for tracking on the go
-
 ## Tech Stack
 
 Money Trees leverages modern, reliable technologies while maintaining data portability:
 
-- **Frontend**: Next.js 14, React 18, TypeScript
+- **Frontend**: Next.js, TypeScript
 - **Styling**: Tailwind CSS with custom animations
-- **State Management**: Jotai for reactive state
-- **Data Processing**: CSV parsing and generation
-- **UI Components**: Radix UI for accessibility
-- **Visualization**: Custom canvas implementation with Spline integration
+- **State Management**: Jotai for reactive state and local storage management
+- **UI Components**: Shadcn/ui for components and charts
+- **Visualization**: Custom canvas implementation 
 
 ## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
 
 ### Installation
 
@@ -73,12 +61,6 @@ Money Trees leverages modern, reliable technologies while maintaining data porta
 
    ```bash
    npm install
-   ```
-
-3. **Set up environment variables**
-
-   ```bash
-   cp .env.example .env.local
    ```
 
 4. **Run the development server**
@@ -119,80 +101,6 @@ date,description,amount,category,id
 2024-01-15,"Salary",3000.00,"Income",uuid-5678
 2024-01-16,"Rent",1200.00,"Housing",uuid-9012
 ```
-
-### Export Your Data
-
-- Visit `/garden/import` and click "Export your data as a CSV file"
-- Your complete financial history downloads instantly
-- Use this data in any financial software, spreadsheet, or analytics tool
-
-### Data Ownership Principles
-
-1. **No Vendor Lock-in**: All data exportable in standard formats
-2. **Local Storage**: Core data stored locally first, synced optionally
-3. **Open Formats**: CSV for transactions, JSON for settings
-4. **Full Access**: Every piece of data is accessible and exportable
-5. **Privacy by Design**: No tracking, no data harvesting
-
-## Contributing
-
-We welcome contributions that align with our file-over-app philosophy:
-
-1. **Maintain Data Portability**: Any new feature should preserve export/import capabilities
-2. **Use Open Standards**: Prefer standard file formats and protocols
-3. **Document Data Structures**: Clearly document any new data formats
-4. **Test Data Migration**: Ensure updates don't break existing data
-
-### Development Guidelines
-
-```bash
-# Run development server
-npm run dev
-
-# Build for production
-npm run build
-
-# Run linting
-npm run lint
-
-# Start production server
-npm start
-```
-
-## Architecture Decisions
-
-### Why These Technologies?
-
-- **Next.js**: Modern React framework with excellent performance
-- **CSV**: Universal, human-readable data format that will outlast any proprietary format
-- **Jotai**: Atomic state management for predictable data flow
-- **TypeScript**: Type safety for robust financial calculations
-
-### File Structure Philosophy
-
-```
-├── app/                    # Next.js app router pages
-├── components/             # Reusable UI components
-├── lib/                    # Utilities and hooks
-├── public/                 # Static assets
-└── export.csv             # Your exportable data lives here
-```
-
-## Inspiration & Philosophy
-
-Money Trees draws inspiration from the **File Over App** movement, recognizing that:
-
-- Financial data is too important to be locked in proprietary formats
-- Users should own their data completely
-- Tools should enhance human capability without creating dependency
-- Simple, open formats often outlast complex, proprietary ones
-
-> _"These days I write using an app I help make called Obsidian, but it's a delusion to think it will last forever. The app will eventually become obsolete. It's the plain text files I create that are designed to last."_ — Steph Ango
-
-## License
-
-MIT License - Your data, your rules.
-
 ## Acknowledgments
 
 - **Steph Ango** for the File Over App philosophy
@@ -201,6 +109,5 @@ MIT License - Your data, your rules.
 
 ---
 
-_Made with 💜 by Shehu — A certified Shehu Product_
+_Made with 💜 by Shehu_
 
-**Remember**: Apps are temporary, but your financial data should be permanent. Choose tools that give you freedom. 🌱
